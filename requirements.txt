@@ -1,0 +1,6 @@
+gradio
+torch
+diffusers
+#transformers
+git+https://github.com/huggingface/transformers
+accelerate
