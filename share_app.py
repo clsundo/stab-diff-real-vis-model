@@ -6,19 +6,26 @@ from PIL import Image
 model_id = 'SG161222/Realistic_Vision_V1.4'
 prefix = 'RAW photo,'
      
+if torch.cuda.is_available():
+  gpu_check = True
+else:
+  gpu_check = False
+
+print("You are flying on a GPU" if gpu_check else "You are *slowing* on a CPU")
+
 scheduler = DPMSolverMultistepScheduler.from_pretrained(model_id, subfolder="scheduler")
 
 pipe = StableDiffusionPipeline.from_pretrained(
   model_id,
-  torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+  torch_dtype=torch.float16 if gpu_check else torch.float32,
   scheduler=scheduler)
 
 pipe_i2i = StableDiffusionImg2ImgPipeline.from_pretrained(
   model_id,
-  torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+  torch_dtype=torch.float16 if gpu_check else torch.float32,
   scheduler=scheduler)
 
-if torch.cuda.is_available():
+if gpu_check:
   pipe = pipe.to("cuda")
   pipe_i2i = pipe_i2i.to("cuda")
 
@@ -102,7 +109,7 @@ def img_to_img(prompt, neg_prompt, img, strength, guidance, steps, width, height
 
 with gr.Blocks() as demo:
     gr.Markdown("Using: " + model_id)
-    gr.Markdown("Using : GPU" if torch.cuda.is_available() else "Using : CPU")
+    gr.Markdown("Using : GPU" if gpu_check else "Using : CPU")
     with gr.Row():
         
         with gr.Column(scale=55):
